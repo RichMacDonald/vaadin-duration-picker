@@ -1,14 +1,14 @@
 package io.binarycodes.vaadin.durationpicker;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 
 public class DurationData {
 
     /* patterns for the manual input */
-    private static final String DURATION_PATTERN_REGEX = "(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(\\d+)?";
+    private static final String DURATION_PATTERN_REGEX = "(?:(\\d+)[dD])?(?:(\\d+)[hH])?(?:(\\d+)[mM])?(?:(\\d+)[sS])?(\\d+)?";
     private static final Pattern DURATION_PATTERN = Pattern.compile(DURATION_PATTERN_REGEX);
     private final Configuration configuration;
 
@@ -26,6 +26,13 @@ public class DurationData {
 
     public DurationData(Configuration configuration, Duration duration) {
         this(configuration);
+
+	  		//Had to override this. There is validation code that checks the output String and fails
+	  		//silently if it does not match. And a Duration with sub-second intervals does not match
+	  		//(returns 5d4h8m.1234s instead of 5d4h8m0s). So we need to truncate the second path
+	  	  // else it does not work
+        duration = duration.truncatedTo(ChronoUnit.SECONDS);
+
         this.days = duration.toDaysPart();
         this.hours = duration.toHoursPart();
         this.minutes = duration.toMinutesPart();
@@ -36,10 +43,9 @@ public class DurationData {
         this(configuration);
         this.valid = true;
 
-        if (StringUtils.isBlank(durationString)) {
+        if (durationString == null || durationString.isBlank()) {
             return;
         }
-
         var matcher = DURATION_PATTERN.matcher(durationString);
         if (!matcher.matches()) {
             return;

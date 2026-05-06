@@ -2,9 +2,9 @@ package io.binarycodes.vaadin.durationpicker;
 
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.UUID;
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -13,9 +13,11 @@ import com.vaadin.flow.component.popover.PopoverPosition;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.shared.Registration;
 
-public class DurationPicker extends CustomField<Duration> {
+public class DurationPicker extends CustomField<Duration>{
 
-    /* configurations */
+    private static final long serialVersionUID = -8081717786553269446L;
+
+		/* configurations */
     private final Configuration configuration;
 
     private final String textFieldId;
@@ -55,7 +57,7 @@ public class DurationPicker extends CustomField<Duration> {
         this.field = new TextField(configuration.getFieldLabel());
         this.field.setId(textFieldId);
 
-        this.field.setAllowedCharPattern("[0-9hdms]");
+        this.field.setAllowedCharPattern("[0-9hdmsHDMS]");
         this.field.addValueChangeListener(event -> {
             var interimValue = new DurationData(configuration, event.getValue());
 
@@ -106,11 +108,11 @@ public class DurationPicker extends CustomField<Duration> {
     @Override
     protected void setPresentationValue(Duration duration) {
         this.value = new DurationData(this.configuration, duration);
+        this.field.setValue(this.value.toString()); //had to add this because it does not show in the text field when set by the server
     }
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        super.setReadOnly(readOnly);
         this.field.setReadOnly(readOnly);
         this.popupButton.setEnabled(!readOnly);
     }
@@ -127,6 +129,15 @@ public class DurationPicker extends CustomField<Duration> {
         // There is a timing bug, workaround
         field.getElement().executeJs("return 0")
                 .then(res -> field.setInvalid(invalid));
+    }
+
+    /**
+     * Bypassing the Builder and Configuration, which prevents us from creating the DurationPicker and THEN
+     * setting the label.
+     */
+    @Override
+		public void setLabel(String label) {
+    		field.setLabel(label);
     }
 
     public static class Builder {
