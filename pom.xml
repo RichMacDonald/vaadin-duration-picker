@@ -41,6 +41,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+
+<!--    temporary until merged-->
+     <distributionManagement>
+        <repository>
+          <id>github-vaadin-duration-picker</id>
+          <name>github richmacdonald vaadin duration picker</name>
+          <url>https://maven.pkg.github.com/richmacdonald/vaadin-duration-picker</url>
+        </repository>
+      </distributionManagement>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
